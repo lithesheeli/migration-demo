@@ -1,0 +1,110 @@
+#!/bin/bash
+ 
+echo "Enter Gitlab URL For Cloning Repo"
+
+read gitlab_url
+ 
+#variable
+
+GITLAB_URL=$gitlab_url
+
+#GITHUB_URL="https://github.com/shubhamjawdand/Migration-branches.git"
+
+GITLAB_TOKEN="***************"
+
+GITHUB_TOKEN="*************"
+ 
+ 
+# GitHub username
+
+echo "enter username"
+
+read your_username
+
+USERNAME=$your_username
+
+# GitHub organization (if applicable)
+
+# ORG="your_organization"
+
+# Repository name
+
+echo "enter repo name with same character and symbol which are you wanted to Migrate"
+
+read new_repo
+
+REPO_NAME=$new_repo
+ 
+# Create a new repository
+
+create_repo() {
+
+  curl -X POST -H "Authorization: token $GITHUB_TOKEN" -d '{"name": "'"$REPO_NAME"'", "private":true}' "https://api.github.com/user/repos"
+
+}
+ 
+# Delete a repository
+
+delete_repo() {
+
+  curl -X DELETE -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$USERNAME/$REPO_NAME"
+
+}
+ 
+# Main script
+
+echo "Creating a new repository..."
+
+create_repo
+
+echo "Repository created successfully."
+ 
+# Uncomment the following lines to delete the repository
+
+# echo "Deleting the repository..."
+ 
+#delete_repo
+
+#===========================
+ 
+# Clone the GitLab repository
+
+migrate_repo() {
+ 
+git clone --mirror "$GITLAB_URL"
+
+cd $REPO_NAME.git
+
+#cd branch-migration-testing.git
+ 
+# Remove GitLab remote
+
+git remote remove origin
+ 
+# Add GitHub remote
+
+git remote add origin "https://$GITHUB_TOKEN@github.com/shubhamjawdand/$REPO_NAME.git"
+ 
+# Push all branches and tags to GitHub
+
+git push --mirror
+ 
+# Cleanup
+
+cd ..
+
+rm -rf $REPO_NAME.git
+
+#rm -rf branch-migration-testing.git
+
+}
+ 
+#migrating repo method triggered
+
+echo "starting cloning process......"
+
+migrate_repo
+
+echo "Migration completed successfully!"
+
+ 
